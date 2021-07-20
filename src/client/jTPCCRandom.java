@@ -114,7 +114,6 @@ public class jTPCCRandom {
      *     Produce a random number uniformly distributed in [x .. y]
      */
     public long nextLong(long x, long y) {
-        new SplittableRandom().nextLong()
         return (long) (random.nextDouble() * (y - x + 1) + x);
     }
 
