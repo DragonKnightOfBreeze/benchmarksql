@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>icu.windea</groupId>
+  <artifactId>benchmarksql</artifactId>
+  <version>5.0</version>
+  <packaging>jar</packaging>
+
+  <name>benchmarksql</name>
+  <description>BenchmarkSql for TPCC test refactored by DragonKnightOfBreeze.</description>
+
+  <properties>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <file.encoding>UTF-8</file.encoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/log4j-1.2.17.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>apache-log4j-extras</artifactId>
+      <version>1.2.17</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/apache-log4j-extras-1.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>javax.resource</groupId>
+      <artifactId>connector-api</artifactId>
+      <version>1.5</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/firebird/connector-api-1.5.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.firebirdsql.jdbc</groupId>
+      <artifactId>jaybird</artifactId>
+      <version>2.2.9</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/firebird/jaybird-2.2.9.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.27</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/mysql/mysql-connector-java-5.1.27.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>9.3-1102.jdbc41</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/postgres/postgresql-9.3-1102.jdbc41.jar</systemPath>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${basedir}/src/client</source>
+                <source>${basedir}/src/jdbc</source>
+                <source>${basedir}/src/LoadData</source>
+                <source>${basedir}/src/OSCollector</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <addMavenDescriptor>false</addMavenDescriptor>
+          </archive>
+          <outputDirectory>dist</outputDirectory>
+          <finalName>BenchmarkSQL-${version}</finalName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
