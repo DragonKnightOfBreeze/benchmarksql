@@ -10,7 +10,6 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="benchmarksql" target="1.8" />
       <module name="benchmarksql-5.0" target="1.8" />
     </bytecodeTargetLevel>
   </component>

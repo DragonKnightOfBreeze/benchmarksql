@@ -1,0 +1,7 @@
+<component name="CopyrightManager">
+  <settings default="benchmarlsql_copyright">
+    <module2copyright>
+      <element module="benchmarksql_src" copyright="benchmarlsql_copyright" />
+    </module2copyright>
+  </settings>
+</component>

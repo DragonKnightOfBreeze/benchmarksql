@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="benchmarksql_source" pattern="file[benchmarksql]:src/main/java//*" />
+</component>

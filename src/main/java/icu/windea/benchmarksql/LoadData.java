@@ -1,22 +1,25 @@
 /*
- * LoadData - Load Sample Data directly into database tables or into
- * CSV files using multiple parallel workers.
- *
  * Copyright (C) 2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * Load Sample Data directly into database tables or into CSV files using multiple parallel workers.
+ */
 public class LoadData {
     private static final Properties ini = new Properties();
     private static String db;
     private static Properties dbProps;
-    private static jTPCCRandom rnd;
+    private static TpccRandom rnd;
     private static String fileLocation = null;
     private static String csvNullValue = null;
 
@@ -66,7 +69,7 @@ public class LoadData {
          * Initialize the global Random generator that picks the
          * C values for the load.
          */
-        rnd = new jTPCCRandom();
+        rnd = new TpccRandom();
 
         /*
          * Load the JDBC driver and prepare the db and dbProps.
@@ -106,8 +109,7 @@ public class LoadData {
             writeCSV = true;
 
             try {
-                configCSV = new BufferedWriter(new FileWriter(fileLocation +
-                    "config.csv"));
+                configCSV = new BufferedWriter(new FileWriter(fileLocation + "config.csv"));
                 itemCSV = new BufferedWriter(new FileWriter(fileLocation +
                     "item.csv"));
                 warehouseCSV = new BufferedWriter(new FileWriter(fileLocation +
@@ -192,82 +194,72 @@ public class LoadData {
                 System.exit(3);
             }
         }
-    } // End of main()
+    }
 
-    public static void configAppend(StringBuffer buf)
-    throws IOException {
+    public static void configAppend(StringBuffer buf) throws IOException {
         synchronized(configCSV) {
             configCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void itemAppend(StringBuffer buf)
-    throws IOException {
+    public static void itemAppend(StringBuffer buf) throws IOException {
         synchronized(itemCSV) {
             itemCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void warehouseAppend(StringBuffer buf)
-    throws IOException {
+    public static void warehouseAppend(StringBuffer buf) throws IOException {
         synchronized(warehouseCSV) {
             warehouseCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void districtAppend(StringBuffer buf)
-    throws IOException {
+    public static void districtAppend(StringBuffer buf) throws IOException {
         synchronized(districtCSV) {
             districtCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void stockAppend(StringBuffer buf)
-    throws IOException {
+    public static void stockAppend(StringBuffer buf) throws IOException {
         synchronized(stockCSV) {
             stockCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void customerAppend(StringBuffer buf)
-    throws IOException {
+    public static void customerAppend(StringBuffer buf) throws IOException {
         synchronized(customerCSV) {
             customerCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void historyAppend(StringBuffer buf)
-    throws IOException {
+    public static void historyAppend(StringBuffer buf) throws IOException {
         synchronized(historyCSV) {
             historyCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void orderAppend(StringBuffer buf)
-    throws IOException {
+    public static void orderAppend(StringBuffer buf) throws IOException {
         synchronized(orderCSV) {
             orderCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void orderLineAppend(StringBuffer buf)
-    throws IOException {
+    public static void orderLineAppend(StringBuffer buf) throws IOException {
         synchronized(orderLineCSV) {
             orderLineCSV.write(buf.toString());
         }
         buf.setLength(0);
     }
 
-    public static void newOrderAppend(StringBuffer buf)
-    throws IOException {
+    public static void newOrderAppend(StringBuffer buf) throws IOException {
         synchronized(newOrderCSV) {
             newOrderCSV.write(buf.toString());
         }

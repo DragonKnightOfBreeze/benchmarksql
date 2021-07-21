@@ -1,11 +1,12 @@
 /*
- * jTPCC - Open Source Java implementation of a TPC-C like benchmark
- *
  * Copyright (C) 2003, Raul Barbosa
  * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import org.apache.log4j.*;
 
@@ -16,9 +17,12 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 
-
-public class jTPCC implements jTPCCConfig {
-    private static final org.apache.log4j.Logger log = Logger.getLogger(jTPCC.class);
+/**
+ * Open Source Java implementation of a TPC-C like benchmark.
+ */
+public class Tpcc implements TpccConfig {
+    private static final Logger logger = Logger.getLogger(Tpcc.class);
+    
     private static String resultDirName = null;
     private static BufferedWriter resultCSV = null;
     private static BufferedWriter runInfoCSV = null;
@@ -27,7 +31,7 @@ public class jTPCC implements jTPCCConfig {
     private int dbType = DB_UNKNOWN;
     private int currentlyDisplayedTerminal;
 
-    private jTPCCTerminal[] terminals;
+    private TpccTerminal[] terminals;
     private String[] terminalNames;
     private boolean terminalsBlockingExit = false;
     private long terminalsStarted = 0;
@@ -35,9 +39,19 @@ public class jTPCC implements jTPCCConfig {
     private long transactionCount = 0;
     private final Object counterLock = new Object();
 
-    private long newOrderCounter = 0, sessionStartTimestamp, sessionEndTimestamp, sessionNextTimestamp = 0, sessionNextKounter = 0;
-    private long sessionEndTargetTime = -1, fastNewOrderCounter, recentTpmC = 0, recentTpmTotal = 0;
-    private boolean signalTerminalsRequestEndSent = false, databaseDriverLoaded = false;
+    private long newOrderCounter = 0;
+    private long sessionStartTimestamp;
+    private long sessionEndTimestamp;
+    private long sessionNextTimestamp = 0;
+    private long sessionNextKounter = 0;
+
+    private long sessionEndTargetTime = -1;
+    private long fastNewOrderCounter;
+    private long recentTpmC = 0;
+    private long recentTpmTotal = 0;
+
+    private boolean signalTerminalsRequestEndSent = false;
+    private boolean databaseDriverLoaded = false;
 
     private FileOutputStream fileOutputStream;
     private PrintStream printStreamReport;
@@ -45,11 +59,10 @@ public class jTPCC implements jTPCCConfig {
     private int limPerMin_Terminal;
 
     private double tpmC;
-    private jTPCCRandom rnd;
-    private OSCollector osCollector = null;
+    private TpccRandom rnd;
+    private OsCollector osCollector = null;
 
-    public jTPCC() {
-
+    public Tpcc() {
         // load the ini file
         Properties ini = new Properties();
         try {
@@ -58,48 +71,48 @@ public class jTPCC implements jTPCCConfig {
             errorMessage("Term-00, could not load properties file");
         }
 
-        log.info("Term-00, ");
-        log.info("Term-00, +-------------------------------------------------------------+");
-        log.info("Term-00,      BenchmarkSQL v" + JTPCCVERSION);
-        log.info("Term-00, +-------------------------------------------------------------+");
-        log.info("Term-00,  (c) 2003, Raul Barbosa");
-        log.info("Term-00,  (c) 2004-2016, Denis Lussier");
-        log.info("Term-00,  (c) 2016, Jan Wieck");
-        log.info("Term-00, +-------------------------------------------------------------+");
-        log.info("Term-00, ");
+        logger.info("Term-00, ");
+        logger.info("Term-00, +-------------------------------------------------------------+");
+        logger.info("Term-00,      BenchmarkSQL v" + TPCC_VERSION);
+        logger.info("Term-00, +-------------------------------------------------------------+");
+        logger.info("Term-00,  (c) 2003, Raul Barbosa");
+        logger.info("Term-00,  (c) 2004-2016, Denis Lussier");
+        logger.info("Term-00,  (c) 2016, Jan Wieck");
+        logger.info("Term-00, +-------------------------------------------------------------+");
+        logger.info("Term-00, ");
         String iDB = getProp(ini, "db");
         String iDriver = getProp(ini, "driver");
         String iConn = getProp(ini, "conn");
         String iUser = getProp(ini, "user");
         String iPassword = ini.getProperty("password");
 
-        log.info("Term-00, ");
+        logger.info("Term-00, ");
         String iWarehouses = getProp(ini, "warehouses");
         String iTerminals = getProp(ini, "terminals");
 
         String iRunTxnsPerTerminal = ini.getProperty("runTxnsPerTerminal");
         String iRunMins = ini.getProperty("runMins");
         if(Integer.parseInt(iRunTxnsPerTerminal) == 0 && Integer.parseInt(iRunMins) != 0) {
-            log.info("Term-00, runMins" + "=" + iRunMins);
+            logger.info("Term-00, runMins" + "=" + iRunMins);
         } else if(Integer.parseInt(iRunTxnsPerTerminal) != 0 && Integer.parseInt(iRunMins) == 0) {
-            log.info("Term-00, runTxnsPerTerminal" + "=" + iRunTxnsPerTerminal);
+            logger.info("Term-00, runTxnsPerTerminal" + "=" + iRunTxnsPerTerminal);
         } else {
             errorMessage("Term-00, Must indicate either transactions per terminal or number of run minutes!");
         }
         String limPerMin = getProp(ini, "limitTxnsPerMin");
         String iTermWhseFixed = getProp(ini, "terminalWarehouseFixed");
-        log.info("Term-00, ");
+        logger.info("Term-00, ");
         String iNewOrderWeight = getProp(ini, "newOrderWeight");
         String iPaymentWeight = getProp(ini, "paymentWeight");
         String iOrderStatusWeight = getProp(ini, "orderStatusWeight");
         String iDeliveryWeight = getProp(ini, "deliveryWeight");
         String iStockLevelWeight = getProp(ini, "stockLevelWeight");
 
-        log.info("Term-00, ");
+        logger.info("Term-00, ");
         String resultDirectory = getProp(ini, "resultDirectory");
         String osCollectorScript = getProp(ini, "osCollectorScript");
 
-        log.info("Term-00, ");
+        logger.info("Term-00, ");
 
         if(iDB.equals("firebird")) {
             dbType = DB_FIREBIRD;
@@ -110,7 +123,7 @@ public class jTPCC implements jTPCCConfig {
         } else if(iDB.equals("mysql")) {
             dbType = DB_UNKNOWN;
         } else {
-            log.error("unknown database type '" + iDB + "'");
+            logger.error("unknown database type '" + iDB + "'");
             return;
         }
 
@@ -119,7 +132,6 @@ public class jTPCC implements jTPCCConfig {
         } else {
             limPerMin_Terminal = -1;
         }
-
 
         boolean iRunMinsBool = false;
 
@@ -166,12 +178,12 @@ public class jTPCC implements jTPCCConfig {
 
             // Create the output directory structure.
             if(!resultDir.mkdir()) {
-                log.error("Failed to create directory '" +
+                logger.error("Failed to create directory '" +
                     resultDir.getPath() + "'");
                 System.exit(1);
             }
             if(!resultDataDir.mkdir()) {
-                log.error("Failed to create directory '" +
+                logger.error("Failed to create directory '" +
                     resultDataDir.getPath() + "'");
                 System.exit(1);
             }
@@ -181,10 +193,10 @@ public class jTPCC implements jTPCCConfig {
                 Files.copy(new File(System.getProperty("prop")).toPath(),
                     new File(resultDir, "run.properties").toPath());
             } catch(IOException e) {
-                log.error(e.getMessage());
+                logger.error(e.getMessage());
                 System.exit(1);
             }
-            log.info("Term-00, copied " + System.getProperty("prop") +
+            logger.info("Term-00, copied " + System.getProperty("prop") +
                 " to " + new File(resultDir, "run.properties").toPath());
 
             // Create the runInfo.csv file.
@@ -192,61 +204,60 @@ public class jTPCC implements jTPCCConfig {
             try {
                 runInfoCSV = new BufferedWriter(
                     new FileWriter(runInfoCSVName));
-                runInfoCSV.write("run,driver,driverVersion,db,sessionStart," +
-                    "runMins," +
-                    "loadWarehouses,runWarehouses,numSUTThreads," +
-                    "limitTxnsPerMin," +
+                runInfoCSV.write("run,driver,driverVersion,db,sessionStart,runMins," +
+                    "loadWarehouses,runWarehouses,numSUTThreads,limitTxnsPerMin," +
                     "thinkTimeMultiplier,keyingTimeMultiplier\n");
             } catch(IOException e) {
-                log.error(e.getMessage());
+                logger.error(e.getMessage());
                 System.exit(1);
             }
-            log.info("Term-00, created " + runInfoCSVName + " for runID " +
+            logger.info("Term-00, created " + runInfoCSVName + " for runID " +
                 runID);
 
             // Open the per transaction result.csv file.
             String resultCSVName = new File(resultDataDir, "result.csv").getPath();
             try {
                 resultCSV = new BufferedWriter(new FileWriter(resultCSVName));
-                resultCSV.write("run,elapsed,latency,dblatency," +
-                    "ttype,rbk,dskipped,error\n");
+                resultCSV.write("run,elapsed,latency,dblatency,ttype,rbk,dskipped,error\n");
             } catch(IOException e) {
-                log.error(e.getMessage());
+                logger.error(e.getMessage());
                 System.exit(1);
             }
-            log.info("Term-00, writing per transaction results to " +
+            logger.info("Term-00, writing per transaction results to " +
                 resultCSVName);
 
             if(osCollectorScript != null) {
-                osCollector = new OSCollector(getProp(ini, "osCollectorScript"),
-                    runID,
-                    Integer.parseInt(getProp(ini, "osCollectorInterval")),
-                    getProp(ini, "osCollectorSSHAddr"),
-                    getProp(ini, "osCollectorDevices"),
-                    resultDataDir, log);
+                osCollector = new OsCollector(
+                    getProp(ini, "osCollectorScript"), runID, Integer.parseInt(getProp(ini, "osCollectorInterval")), 
+                    getProp(ini, "osCollectorSSHAddr"), getProp(ini, "osCollectorDevices"), resultDataDir
+                );
             }
 
-            log.info("Term-00,");
+            logger.info("Term-00,");
         }
 
         if(databaseDriverLoaded) {
-            try {
-                boolean limitIsTime = iRunMinsBool;
-                int numTerminals = -1;
-                int transactionsPerTerminal = -1;
-                int numWarehouses = -1;
-                int loadWarehouses = -1;
-                int newOrderWeightValue = -1, paymentWeightValue = -1, orderStatusWeightValue = -1, deliveryWeightValue = -1, stockLevelWeightValue = -1;
-                long executionTimeMillis = -1;
-                boolean terminalWarehouseFixed = true;
-                long CLoad;
+            boolean limitIsTime = iRunMinsBool;
+            int numTerminals = -1;
+            int transactionsPerTerminal = -1;
+            int numWarehouses = -1;
+            int loadWarehouses = -1;
+            int newOrderWeightValue = -1;
+            int paymentWeightValue = -1;
+            int orderStatusWeightValue = -1;
+            int deliveryWeightValue = -1;
+            int stockLevelWeightValue = -1;
+            long executionTimeMillis = -1;
+            boolean terminalWarehouseFixed = true;
+            long CLoad;
+            Properties dbProps = new Properties();
 
-                Properties dbProps = new Properties();
+            try {
                 dbProps.setProperty("user", iUser);
                 dbProps.setProperty("password", iPassword);
 
                 /*
-                 * Fine tuning of database conneciton parameters if needed.
+                 * Fine tuning of database connection parameters if needed.
                  */
                 switch(dbType) {
                 case DB_FIREBIRD:
@@ -264,24 +275,21 @@ public class jTPCC implements jTPCCConfig {
                             "isc_tpb_write," +
                             "isc_tpb_wait");
                     break;
-
                 default:
                     break;
                 }
 
                 try {
-                    loadWarehouses = Integer.parseInt(jTPCCUtil.getConfig(iConn,
-                        dbProps, "warehouses"));
-                    CLoad = Long.parseLong(jTPCCUtil.getConfig(iConn,
-                        dbProps, "nURandCLast"));
+                    loadWarehouses = Integer.parseInt(TpccUtil.getConfig(iConn, dbProps, "warehouses"));
+                    CLoad = Long.parseLong(TpccUtil.getConfig(iConn, dbProps, "nURandCLast"));
                 } catch(Exception e) {
                     errorMessage(e.getMessage());
                     throw e;
                 }
-                this.rnd = new jTPCCRandom(CLoad);
-                log.info("Term-00, C value for C_LAST during load: " + CLoad);
-                log.info("Term-00, C value for C_LAST this run:    " + rnd.getNURandCLast());
-                log.info("Term-00, ");
+                this.rnd = new TpccRandom(CLoad);
+                logger.info("Term-00, C value for C_LAST during load: " + CLoad);
+                logger.info("Term-00, C value for C_LAST this run:    " + rnd.getNURandCLast());
+                logger.info("Term-00, ");
 
                 fastNewOrderCounter = 0;
                 updateStatusLine();
@@ -309,8 +317,7 @@ public class jTPCC implements jTPCCConfig {
                     throw new Exception();
                 }
                 if(numWarehouses > loadWarehouses) {
-                    errorMessage("numWarehouses cannot be greater " +
-                        "than the warehouses loaded in the database");
+                    errorMessage("numWarehouses cannot be greater than the warehouses loaded in the database");
                     throw new Exception();
                 }
 
@@ -323,7 +330,6 @@ public class jTPCC implements jTPCCConfig {
                     errorMessage("Invalid number of terminals!");
                     throw new Exception();
                 }
-
 
                 if(Long.parseLong(iRunMins) != 0 && Integer.parseInt(iRunTxnsPerTerminal) == 0) {
                     try {
@@ -374,11 +380,7 @@ public class jTPCC implements jTPCCConfig {
                     throw new Exception();
                 }
 
-                if(newOrderWeightValue
-                    + paymentWeightValue
-                    + orderStatusWeightValue
-                    + deliveryWeightValue
-                    + stockLevelWeightValue > 100) {
+                if(newOrderWeightValue + paymentWeightValue + orderStatusWeightValue + deliveryWeightValue + stockLevelWeightValue > 100) {
                     errorMessage("Sum of mix percentage parameters exceeds 100%!");
                     throw new Exception();
                 }
@@ -416,115 +418,112 @@ public class jTPCC implements jTPCCConfig {
                     + "% Stock-Level");
 
                 printMessage("Number of Terminals\t" + numTerminals);
+            } catch(Exception ex) {
+            }
 
-                terminals = new jTPCCTerminal[numTerminals];
-                terminalNames = new String[numTerminals];
-                terminalsStarted = numTerminals;
-                try {
-                    String database = iConn;
-                    String username = iUser;
-                    String password = iPassword;
+            terminals = new TpccTerminal[numTerminals];
+            terminalNames = new String[numTerminals];
+            terminalsStarted = numTerminals;
+            try {
+                String database = iConn;
+                String username = iUser;
+                String password = iPassword;
 
-                    int[][] usedTerminals = new int[numWarehouses][10];
-                    for(int i = 0; i < numWarehouses; i++) {
-                        for(int j = 0; j < 10; j++) {
-                            usedTerminals[i][j] = 0;
-                        }
+                int[][] usedTerminals = new int[numWarehouses][10];
+                for(int i = 0; i < numWarehouses; i++) {
+                    for(int j = 0; j < 10; j++) {
+                        usedTerminals[i][j] = 0;
                     }
-
-                    for(int i = 0; i < numTerminals; i++) {
-                        int terminalWarehouseID;
-                        int terminalDistrictID;
-                        do {
-                            terminalWarehouseID = rnd.nextInt(1, numWarehouses);
-                            terminalDistrictID = rnd.nextInt(1, 10);
-                        }
-                        while(usedTerminals[terminalWarehouseID - 1][terminalDistrictID - 1] == 1);
-                        usedTerminals[terminalWarehouseID - 1][terminalDistrictID - 1] = 1;
-
-                        String terminalName = "Term-" + (i >= 9 ? "" + (i + 1) : "0" + (i + 1));
-                        Connection conn = null;
-                        printMessage("Creating database connection for " + terminalName + "...");
-                        conn = DriverManager.getConnection(database, dbProps);
-                        conn.setAutoCommit(false);
-
-                        jTPCCTerminal terminal = new jTPCCTerminal
-                            (terminalName, terminalWarehouseID, terminalDistrictID,
-                                conn, dbType,
-                                transactionsPerTerminal, terminalWarehouseFixed,
-                                paymentWeightValue, orderStatusWeightValue,
-                                deliveryWeightValue, stockLevelWeightValue, numWarehouses, limPerMin_Terminal, this);
-
-                        terminals[i] = terminal;
-                        terminalNames[i] = terminalName;
-                        printMessage(terminalName + "\t" + terminalWarehouseID);
-                    }
-
-                    sessionEndTargetTime = executionTimeMillis;
-                    signalTerminalsRequestEndSent = false;
-
-
-                    printMessage("Transaction\tWeight");
-                    printMessage("% New-Order\t" + newOrderWeightValue);
-                    printMessage("% Payment\t" + paymentWeightValue);
-                    printMessage("% Order-Status\t" + orderStatusWeightValue);
-                    printMessage("% Delivery\t" + deliveryWeightValue);
-                    printMessage("% Stock-Level\t" + stockLevelWeightValue);
-
-                    printMessage("Transaction Number\tTerminal\tType\tExecution Time (ms)\t\tComment");
-
-                    printMessage("Created " + numTerminals + " terminal(s) successfully!");
-                    boolean dummvar = true;
-
-
-                    // Create Terminals, Start Transactions
-                    sessionStart = getCurrentTime();
-                    sessionStartTimestamp = System.currentTimeMillis();
-                    sessionNextTimestamp = sessionStartTimestamp;
-                    if(sessionEndTargetTime != -1) {
-                        sessionEndTargetTime += sessionStartTimestamp;
-                    }
-
-                    // Record run parameters in runInfo.csv
-                    if(runInfoCSV != null) {
-                        try {
-                            StringBuffer infoSB = new StringBuffer();
-                            Formatter infoFmt = new Formatter(infoSB);
-                            infoFmt.format("%d,simple,%s,%s,%s,%s,%d,%d,%d,%d,1.0,1.0\n",
-                                runID, JTPCCVERSION, iDB,
-                                new Timestamp(sessionStartTimestamp),
-                                iRunMins,
-                                loadWarehouses,
-                                numWarehouses,
-                                numTerminals,
-                                Integer.parseInt(limPerMin));
-                            runInfoCSV.write(infoSB.toString());
-                            runInfoCSV.close();
-                        } catch(Exception e) {
-                            log.error(e.getMessage());
-                            System.exit(1);
-                        }
-                    }
-
-                    synchronized(terminals) {
-                        printMessage("Starting all terminals...");
-                        transactionCount = 1;
-                        for(int i = 0; i < terminals.length; i++) {
-                            (new Thread(terminals[i])).start();
-                        }
-
-                    }
-
-                    printMessage("All terminals started executing " + sessionStart);
-                } catch(Exception e1) {
-                    errorMessage("This session ended with errors!");
-                    printStreamReport.close();
-                    fileOutputStream.close();
-
-                    throw new Exception();
                 }
 
-            } catch(Exception ex) {
+                for(int i = 0; i < numTerminals; i++) {
+                    int terminalWarehouseID;
+                    int terminalDistrictID;
+                    do {
+                        terminalWarehouseID = rnd.nextInt(1, numWarehouses);
+                        terminalDistrictID = rnd.nextInt(1, 10);
+                    }
+                    while(usedTerminals[terminalWarehouseID - 1][terminalDistrictID - 1] == 1);
+                    usedTerminals[terminalWarehouseID - 1][terminalDistrictID - 1] = 1;
+
+                    String terminalName = "Term-" + (i >= 9 ? "" + (i + 1) : "0" + (i + 1));
+                    Connection conn = null;
+                    printMessage("Creating database connection for " + terminalName + "...");
+                    conn = DriverManager.getConnection(database, dbProps);
+                    conn.setAutoCommit(false);
+
+                    TpccTerminal terminal = new TpccTerminal
+                        (terminalName, terminalWarehouseID, terminalDistrictID,
+                            conn, dbType,
+                            transactionsPerTerminal, terminalWarehouseFixed,
+                            paymentWeightValue, orderStatusWeightValue,
+                            deliveryWeightValue, stockLevelWeightValue, numWarehouses, limPerMin_Terminal, this);
+
+                    terminals[i] = terminal;
+                    terminalNames[i] = terminalName;
+                    printMessage(terminalName + "\t" + terminalWarehouseID);
+                }
+
+                sessionEndTargetTime = executionTimeMillis;
+                signalTerminalsRequestEndSent = false;
+
+                printMessage("Transaction\tWeight");
+                printMessage("% New-Order\t" + newOrderWeightValue);
+                printMessage("% Payment\t" + paymentWeightValue);
+                printMessage("% Order-Status\t" + orderStatusWeightValue);
+                printMessage("% Delivery\t" + deliveryWeightValue);
+                printMessage("% Stock-Level\t" + stockLevelWeightValue);
+
+                printMessage("Transaction Number\tTerminal\tType\tExecution Time (ms)\t\tComment");
+
+                printMessage("Created " + numTerminals + " terminal(s) successfully!");
+                boolean dummvar = true;
+
+                // Create Terminals, Start Transactions
+                sessionStart = getCurrentTime();
+                sessionStartTimestamp = System.currentTimeMillis();
+                sessionNextTimestamp = sessionStartTimestamp;
+                if(sessionEndTargetTime != -1) {
+                    sessionEndTargetTime += sessionStartTimestamp;
+                }
+
+                // Record run parameters in runInfo.csv
+                if(runInfoCSV != null) {
+                    try {
+                        StringBuffer infoSB = new StringBuffer();
+                        Formatter infoFmt = new Formatter(infoSB);
+                        infoFmt.format("%d,simple,%s,%s,%s,%s,%d,%d,%d,%d,1.0,1.0\n",
+                            runID, TPCC_VERSION, iDB,
+                            new Timestamp(sessionStartTimestamp),
+                            iRunMins,
+                            loadWarehouses,
+                            numWarehouses,
+                            numTerminals,
+                            Integer.parseInt(limPerMin));
+                        runInfoCSV.write(infoSB.toString());
+                        runInfoCSV.close();
+                    } catch(Exception e) {
+                        logger.error(e.getMessage());
+                        System.exit(1);
+                    }
+                }
+
+                synchronized(terminals) {
+                    printMessage("Starting all terminals...");
+                    transactionCount = 1;
+                    for(int i = 0; i < terminals.length; i++) {
+                        (new Thread(terminals[i])).start();
+                    }
+
+                }
+
+                printMessage("All terminals started executing " + sessionStart);
+            } catch(Exception e1) {
+                errorMessage("This session ended with errors!");
+                try {
+                    printStreamReport.close();
+                    fileOutputStream.close();
+                } catch(IOException ignored) {}
             }
         }
         updateStatusLine();
@@ -532,12 +531,12 @@ public class jTPCC implements jTPCCConfig {
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("log4j.properties");
-        new jTPCC();
+        new Tpcc();
     }
 
     private String getProp(Properties p, String pName) {
         String prop = p.getProperty(pName);
-        log.info("Term-00, " + pName + "=" + prop);
+        logger.info("Term-00, " + pName + "=" + prop);
         return (prop);
     }
 
@@ -561,7 +560,7 @@ public class jTPCC implements jTPCCConfig {
         }
     }
 
-    public void signalTerminalEnded(jTPCCTerminal terminal, long countNewOrdersExecuted) {
+    public void signalTerminalEnded(TpccTerminal terminal, long countNewOrdersExecuted) {
         synchronized(terminals) {
             boolean found = false;
             terminalsStarted--;
@@ -589,11 +588,11 @@ public class jTPCC implements jTPCCConfig {
                 try {
                     resultCSV.close();
                 } catch(IOException e) {
-                    log.error(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             }
 
-            // Stop the OSCollector, if it is active.
+            // Stop the OsCollector, if it is active.
             if(osCollector != null) {
                 osCollector.stop();
                 osCollector = null;
@@ -616,17 +615,17 @@ public class jTPCC implements jTPCCConfig {
 
     }
 
-    public jTPCCRandom getRnd() {
+    public TpccRandom getRnd() {
         return rnd;
     }
 
-    public void resultAppend(jTPCCTData term) {
+    public void resultAppend(TpccData term) {
         if(resultCSV != null) {
             try {
                 resultCSV.write(runID + "," +
                     term.resultLine(sessionStartTimestamp));
             } catch(IOException e) {
-                log.error("Term-00, " + e.getMessage());
+                logger.error("Term-00, " + e.getMessage());
             }
         }
     }
@@ -639,22 +638,22 @@ public class jTPCC implements jTPCCConfig {
         double tpmTotal = (6000000 * transactionCount / (currTimeMillis - sessionStartTimestamp)) / 100.0;
 
         System.out.println();
-        log.info("Term-00, ");
-        log.info("Term-00, ");
-        log.info("Term-00, Measured tpmC (NewOrders) = " + tpmC);
-        log.info("Term-00, Measured tpmTOTAL = " + tpmTotal);
-        log.info("Term-00, Session Start     = " + sessionStart);
-        log.info("Term-00, Session End       = " + sessionEnd);
-        log.info("Term-00, Transaction Count = " + (transactionCount - 1));
+        logger.info("Term-00, ");
+        logger.info("Term-00, ");
+        logger.info("Term-00, Measured tpmC (NewOrders) = " + tpmC);
+        logger.info("Term-00, Measured tpmTOTAL = " + tpmTotal);
+        logger.info("Term-00, Session Start     = " + sessionStart);
+        logger.info("Term-00, Session End       = " + sessionEnd);
+        logger.info("Term-00, Transaction Count = " + (transactionCount - 1));
 
     }
 
     private void printMessage(String message) {
-        log.trace("Term-00, " + message);
+        logger.trace("Term-00, " + message);
     }
 
     private void errorMessage(String message) {
-        log.error("Term-00, " + message);
+        logger.error("Term-00, " + message);
     }
 
     private void exit() {

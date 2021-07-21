@@ -1,23 +1,24 @@
 /*
- * jTPCCUtil - utility functions for the Open Source Java implementation of
- *    the TPC-C benchmark
- *
  * Copyright (C) 2003, Raul Barbosa
  * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
 
+package icu.windea.benchmarksql;
 
 import java.sql.*;
 import java.util.*;
 
-public class jTPCCUtil implements jTPCCConfig {
+/**
+ * Utility functions for the Open Source Java implementation of the TPC-C benchmark.
+ */
+public class TpccUtil implements TpccConfig {
     private static Connection dbConn = null;
     private static PreparedStatement stmtGetConfig = null;
 
     public static String getSysProp(String inSysProperty, String defaultValue) {
-
         String outPropertyValue = null;
 
         try {
@@ -27,29 +28,20 @@ public class jTPCCUtil implements jTPCCConfig {
         }
 
         return (outPropertyValue);
-
     }
-
-
+    
     public static String randomStr(long strLen) {
-
         char freshChar;
-        String freshString;
-        freshString = "";
-
+        StringBuilder freshString = new StringBuilder();
         while(freshString.length() < (strLen - 1)) {
-
             freshChar = (char) (Math.random() * 128);
             if(Character.isLetter(freshChar)) {
-                freshString += freshChar;
+                freshString.append(freshChar);
             }
         }
-
-        return (freshString);
-
+        return freshString.toString();
     }
-
-
+    
     public static String getCurrentTime() {
         return dateFormat.format(new java.util.Date());
     }
@@ -59,16 +51,13 @@ public class jTPCCUtil implements jTPCCConfig {
         return dS.length() > 6 ? dS.substring(0, 6) : dS;
     }
 
-    public static String getConfig(String db, Properties dbProps, String option)
-    throws Exception {
+    public static String getConfig(String db, Properties dbProps, String option) throws Exception {
         ResultSet rs;
         String value;
 
         if(dbConn == null) {
             dbConn = DriverManager.getConnection(db, dbProps);
-            stmtGetConfig = dbConn.prepareStatement(
-                "select cfg_value from bmsql_config " +
-                    " where cfg_name = ?");
+            stmtGetConfig = dbConn.prepareStatement("select cfg_value from bmsql_config where cfg_name = ?");
         }
         stmtGetConfig.setString(1, option);
         rs = stmtGetConfig.executeQuery();
@@ -81,5 +70,4 @@ public class jTPCCUtil implements jTPCCConfig {
 
         return value;
     }
-
 }

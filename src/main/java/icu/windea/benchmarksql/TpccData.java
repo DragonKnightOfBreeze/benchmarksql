@@ -1,10 +1,11 @@
 /*
- * jTPCCTData - The simulated terminal input/output data.
- *
  * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import org.apache.log4j.*;
 
@@ -12,26 +13,28 @@ import java.math.*;
 import java.sql.*;
 import java.util.*;
 
-public class jTPCCTData {
-    public final static int
-        TT_NEW_ORDER = 0,
-        TT_PAYMENT = 1,
-        TT_ORDER_STATUS = 2,
-        TT_STOCK_LEVEL = 3,
-        TT_DELIVERY = 4,
-        TT_DELIVERY_BG = 5,
-        TT_NONE = 6,
-        TT_DONE = 7;
+/**
+ * The simulated terminal input/output data.
+ */
+public class TpccData {
+    public final static int TT_NEW_ORDER = 0;
+    public final static int TT_PAYMENT = 1;
+    public final static int TT_ORDER_STATUS = 2;
+    public final static int TT_STOCK_LEVEL = 3;
+    public final static int TT_DELIVERY = 4;
+    public final static int TT_DELIVERY_BG = 5;
+    public final static int TT_NONE = 6;
+    public final static int TT_DONE = 7;
     public final static String[] transTypeNames = {
         "NEW_ORDER", "PAYMENT", "ORDER_STATUS", "STOCK_LEVEL",
         "DELIVERY", "DELIVERY_BG", "NONE", "DONE"
     };
     private static final Object traceLock = new Object();
-    public int sched_code;
-    public long sched_fuzz;
-    public jTPCCTData term_left;
-    public jTPCCTData term_right;
-    public int tree_height;
+    //public int sched_code;
+    //public long sched_fuzz;
+    //public TpccData term_left;
+    //public TpccData term_right;
+    //public int tree_height;
     protected int numWarehouses = 0;
     private int transType;
     private long transDue;
@@ -70,7 +73,7 @@ public class jTPCCTData {
         terminalDistrict = district;
     }
 
-    public void execute(Logger log, jTPCCConnection db)
+    public void execute(Logger log, TpccConnection db)
     throws Exception {
         transStart = System.currentTimeMillis();
         if(transDue == 0) {
@@ -81,27 +84,21 @@ public class jTPCCTData {
         case TT_NEW_ORDER:
             executeNewOrder(log, db);
             break;
-
         case TT_PAYMENT:
             executePayment(log, db);
             break;
-
         case TT_ORDER_STATUS:
             executeOrderStatus(log, db);
             break;
-
         case TT_STOCK_LEVEL:
             executeStockLevel(log, db);
             break;
-
         case TT_DELIVERY:
             executeDelivery(log, db);
             break;
-
         case TT_DELIVERY_BG:
             executeDeliveryBG(log, db);
             break;
-
         default:
             throw new Exception("Unknown transType " + transType);
         }
@@ -109,8 +106,7 @@ public class jTPCCTData {
         transEnd = System.currentTimeMillis();
     }
 
-    public void traceScreen(Logger log)
-    throws Exception {
+    public void traceScreen(Logger log) throws Exception {
         StringBuffer sb = new StringBuffer();
         Formatter fmt = new Formatter(sb);
 
@@ -131,25 +127,20 @@ public class jTPCCTData {
 
         synchronized(traceLock) {
             fmt.format("==== %s %s ==== Terminal %d,%d =================================================",
-                transTypeNames[transType],
-                (transEnd == 0) ? "INPUT" : "OUTPUT",
-                terminalWarehouse, terminalDistrict);
+                transTypeNames[transType], (transEnd == 0) ? "INPUT" : "OUTPUT", terminalWarehouse, terminalDistrict);
             sb.setLength(79);
             log.trace(sb.toString());
             sb.setLength(0);
 
-            fmt.format("---- Due:   %s", (transDue == 0) ? "N/A" :
-                new java.sql.Timestamp(transDue).toString());
+            fmt.format("---- Due:   %s", (transDue == 0) ? "N/A" : new java.sql.Timestamp(transDue).toString());
             log.trace(sb.toString());
             sb.setLength(0);
 
-            fmt.format("---- Start: %s", (transStart == 0) ? "N/A" :
-                new java.sql.Timestamp(transStart).toString());
+            fmt.format("---- Start: %s", (transStart == 0) ? "N/A" : new java.sql.Timestamp(transStart).toString());
             log.trace(sb.toString());
             sb.setLength(0);
 
-            fmt.format("---- End:   %s", (transEnd == 0) ? "N/A" :
-                new java.sql.Timestamp(transEnd).toString());
+            fmt.format("---- End:   %s", (transEnd == 0) ? "N/A" : new java.sql.Timestamp(transEnd).toString());
             log.trace(sb.toString());
             sb.setLength(0);
 
@@ -165,27 +156,21 @@ public class jTPCCTData {
             case TT_NEW_ORDER:
                 traceNewOrder(log, screenFmt);
                 break;
-
             case TT_PAYMENT:
                 tracePayment(log, screenFmt);
                 break;
-
             case TT_ORDER_STATUS:
                 traceOrderStatus(log, screenFmt);
                 break;
-
             case TT_STOCK_LEVEL:
                 traceStockLevel(log, screenFmt);
                 break;
-
             case TT_DELIVERY:
                 traceDelivery(log, screenFmt);
                 break;
-
             case TT_DELIVERY_BG:
                 traceDeliveryBG(log, screenFmt);
                 break;
-
             default:
                 throw new Exception("Unknown transType " + transType);
             }
@@ -223,7 +208,8 @@ public class jTPCCTData {
      * ***** NEW_ORDER related methods and subclass. ************************
      * **********************************************************************
      * *********************************************************************/
-    public void generateNewOrder(Logger log, jTPCCRandom rnd, long due) {
+    
+    public void generateNewOrder(Logger log, TpccRandom rnd, long due) {
         int o_ol_cnt;
         int i = 0;
 
@@ -273,8 +259,7 @@ public class jTPCCTData {
         }
     }
 
-    private void executeNewOrder(Logger log, jTPCCConnection db)
-    throws Exception {
+    private void executeNewOrder(Logger log, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         PreparedStatement insertOrderLineBatch;
         PreparedStatement updateStockBatch;
@@ -495,7 +480,7 @@ public class jTPCCTData {
                 insertOrderLineBatch.setInt(6, newOrder.ol_supply_w_id[seq]);
                 insertOrderLineBatch.setInt(7, newOrder.ol_quantity[seq]);
                 insertOrderLineBatch.setDouble(8,
-                    new BigDecimal(newOrder.ol_amount[seq]).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    BigDecimal.valueOf(newOrder.ol_amount[seq]).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
                 switch(newOrder.d_id) {
                 case 1:
                     insertOrderLineBatch.setString(9, rs.getString("s_dist_01"));
@@ -635,7 +620,8 @@ public class jTPCCTData {
      * ***** PAYMENT related methods and subclass. **************************
      * **********************************************************************
      * *********************************************************************/
-    public void generatePayment(Logger log, jTPCCRandom rnd, long due) {
+    
+    public void generatePayment(Logger log, TpccRandom rnd, long due) {
         transType = TT_PAYMENT;
         transDue = due;
         transStart = 0;
@@ -672,8 +658,7 @@ public class jTPCCTData {
         payment.h_amount = ((double) rnd.nextLong(100, 500000)) / 100.0;
     }
 
-    private void executePayment(Logger log, jTPCCConnection db)
-    throws Exception {
+    private void executePayment(Logger log, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         ResultSet rs;
         Vector<Integer> c_id_list = new Vector<>();
@@ -949,7 +934,8 @@ public class jTPCCTData {
      * ***** ORDER_STATUS related methods and subclass. *********************
      * **********************************************************************
      * *********************************************************************/
-    public void generateOrderStatus(Logger log, jTPCCRandom rnd, long due) {
+    
+    public void generateOrderStatus(Logger log, TpccRandom rnd, long due) {
         transType = TT_ORDER_STATUS;
         transDue = due;
         transStart = 0;
@@ -975,8 +961,7 @@ public class jTPCCTData {
         }
     }
 
-    private void executeOrderStatus(Logger log, jTPCCConnection db)
-    throws Exception {
+    private void executeOrderStatus(Logger log, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         ResultSet rs;
         Vector<Integer> c_id_list = new Vector<>();
@@ -1156,7 +1141,8 @@ public class jTPCCTData {
      * ***** STOCK_LEVEL related methods and subclass. **********************
      * **********************************************************************
      * *********************************************************************/
-    public void generateStockLevel(Logger log, jTPCCRandom rnd, long due) {
+    
+    public void generateStockLevel(Logger log, TpccRandom rnd, long due) {
         transType = TT_STOCK_LEVEL;
         transDue = due;
         transStart = 0;
@@ -1176,8 +1162,7 @@ public class jTPCCTData {
         stockLevel.threshold = rnd.nextInt(10, 20);
     }
 
-    private void executeStockLevel(Logger log, jTPCCConnection db)
-    throws Exception {
+    private void executeStockLevel(Logger log, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         ResultSet rs;
 
@@ -1242,7 +1227,8 @@ public class jTPCCTData {
      * ***** DELIVERY related methods and subclass. *************************
      * **********************************************************************
      * *********************************************************************/
-    public void generateDelivery(Logger log, jTPCCRandom rnd, long due) {
+    
+    public void generateDelivery(Logger log, TpccRandom rnd, long due) {
         transType = TT_DELIVERY;
         transDue = due;
         transStart = 0;
@@ -1263,7 +1249,7 @@ public class jTPCCTData {
         delivery.deliveryBG = null;
     }
 
-    private void executeDelivery(Logger log, jTPCCConnection db) {
+    private void executeDelivery(Logger log, TpccConnection db) {
         long now = System.currentTimeMillis();
 
         /*
@@ -1274,7 +1260,7 @@ public class jTPCCTData {
          * (DeliveryBG). We store that TData object in the delivery
          * part for the caller to pick up and queue/execute.
          */
-        delivery.deliveryBG = new jTPCCTData();
+        delivery.deliveryBG = new TpccData();
         delivery.deliveryBG.generateDeliveryBG(delivery.w_id, now,
             new java.sql.Timestamp(now).toString(), this);
         delivery.execution_status = "Delivery has been queued";
@@ -1291,8 +1277,7 @@ public class jTPCCTData {
         }
     }
 
-    public jTPCCTData getDeliveryBG()
-    throws Exception {
+    public TpccData getDeliveryBG() throws Exception {
         if(transType != TT_DELIVERY) {
             throw new Exception("Not a DELIVERY");
         }
@@ -1301,7 +1286,7 @@ public class jTPCCTData {
                 "or background part already consumed");
         }
 
-        jTPCCTData result = delivery.deliveryBG;
+        TpccData result = delivery.deliveryBG;
         delivery.deliveryBG = null;
         return result;
     }
@@ -1311,8 +1296,8 @@ public class jTPCCTData {
      * ***** DELIVERY_BG related methods and subclass. **********************
      * **********************************************************************
      * *********************************************************************/
-    private void generateDeliveryBG(int w_id, long due, String ol_delivery_d,
-        jTPCCTData parent) {
+    
+    private void generateDeliveryBG(int w_id, long due, String ol_delivery_d, TpccData parent) {
         /*
          * The DELIVERY_BG part is created as a result of executing the
          * foreground part of the DELIVERY transaction. Because of that
@@ -1346,8 +1331,7 @@ public class jTPCCTData {
         }
     }
 
-    private void executeDeliveryBG(Logger log, jTPCCConnection db)
-    throws Exception {
+    private void executeDeliveryBG(Logger log, TpccConnection db) throws Exception {
         PreparedStatement stmt1;
         PreparedStatement stmt2;
         ResultSet rs;
@@ -1527,7 +1511,7 @@ public class jTPCCTData {
         return numSkipped;
     }
 
-    private class NewOrderData {
+    private static class NewOrderData {
         /* terminal input data */
         public int w_id;
         public int d_id;
@@ -1556,7 +1540,7 @@ public class jTPCCTData {
         public double[] ol_amount = new double[15];
     }
 
-    private class PaymentData {
+    private static class PaymentData {
         /* terminal input data */
         public int w_id;
         public int d_id;
@@ -1596,7 +1580,7 @@ public class jTPCCTData {
         public String h_date;
     }
 
-    private class OrderStatusData {
+    private static class OrderStatusData {
         /* terminal input data */
         public int w_id;
         public int d_id;
@@ -1618,7 +1602,7 @@ public class jTPCCTData {
         public String[] ol_delivery_d = new String[15];
     }
 
-    private class StockLevelData {
+    private static class StockLevelData {
         /* terminal input data */
         public int w_id;
         public int d_id;
@@ -1628,7 +1612,7 @@ public class jTPCCTData {
         public int low_stock;
     }
 
-    private class DeliveryData {
+    private static class DeliveryData {
         /* terminal input data */
         public int w_id;
         public int o_carrier_id;
@@ -1640,10 +1624,10 @@ public class jTPCCTData {
          * executeDelivery() will store the background request
          * here for the caller to pick up and process as needed.
          */
-        public jTPCCTData deliveryBG;
+        public TpccData deliveryBG;
     }
 
-    private class DeliveryBGData {
+    private static class DeliveryBGData {
         /* DELIVERY_BG data */
         public int w_id;
         public int o_carrier_id;

@@ -1,34 +1,34 @@
 /*
- * OSCollector.java
- *
  * Copyright (C) 2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import org.apache.log4j.*;
 
 import java.io.*;
 import java.util.*;
 
-public class OSCollector {
+public class OsCollector {
+    private static final Logger logger = Logger.getLogger(OsCollector.class);
+    
     private final String script;
     private final int interval;
     private final String sshAddress;
     private final String devices;
     private final File outputDir;
-    private final Logger log;
 
-    private CollectData collector = null;
-    private Thread collectorThread = null;
+    private CollectData collector;
+    private Thread collectorThread;
     private boolean endCollection = false;
     private Process collProc;
 
     private BufferedWriter[] resultCSVs;
 
-    public OSCollector(String script, int runID, int interval,
-        String sshAddress, String devices, File outputDir,
-        Logger log) {
+    public OsCollector(String script, int runID, int interval, String sshAddress, String devices, File outputDir) {
         List<String> cmdLine = new ArrayList<>();
         String[] deviceNames;
 
@@ -37,7 +37,6 @@ public class OSCollector {
         this.sshAddress = sshAddress;
         this.devices = devices;
         this.outputDir = outputDir;
-        this.log = log;
 
         if(sshAddress != null) {
             cmdLine.add("ssh");
@@ -56,15 +55,13 @@ public class OSCollector {
 
         try {
             resultCSVs = new BufferedWriter[deviceNames.length + 1];
-            resultCSVs[0] = new BufferedWriter(new FileWriter(
-                new File(outputDir, "sys_info.csv")));
+            resultCSVs[0] = new BufferedWriter(new FileWriter(new File(outputDir, "sys_info.csv")));
             for(int i = 0; i < deviceNames.length; i++) {
                 cmdLine.add(deviceNames[i]);
-                resultCSVs[i + 1] = new BufferedWriter(new FileWriter(
-                    new File(outputDir, deviceNames[i] + ".csv")));
+                resultCSVs[i + 1] = new BufferedWriter(new FileWriter(new File(outputDir, deviceNames[i] + ".csv")));
             }
         } catch(Exception e) {
-            log.error("OSCollector, " + e.getMessage());
+            logger.error("OsCollector, " + e.getMessage());
             System.exit(1);
         }
 
@@ -75,8 +72,7 @@ public class OSCollector {
             collProc = pb.start();
 
             BufferedReader scriptReader = new BufferedReader(new FileReader(script));
-            BufferedWriter scriptWriter = new BufferedWriter(
-                new OutputStreamWriter(collProc.getOutputStream()));
+            BufferedWriter scriptWriter = new BufferedWriter(new OutputStreamWriter(collProc.getOutputStream()));
             String line;
             while((line = scriptReader.readLine()) != null) {
                 scriptWriter.write(line);
@@ -85,7 +81,7 @@ public class OSCollector {
             scriptWriter.close();
             scriptReader.close();
         } catch(Exception e) {
-            log.error("OSCollector " + e.getMessage());
+            logger.error("OsCollector " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
@@ -100,14 +96,14 @@ public class OSCollector {
         try {
             collectorThread.join();
         } catch(InterruptedException ie) {
-            log.error("OSCollector, " + ie.getMessage());
+            logger.error("OsCollector, " + ie.getMessage());
         }
     }
 
-    private class CollectData implements Runnable {
-        private final OSCollector parent;
+    private static class CollectData implements Runnable {
+        private final OsCollector parent;
 
-        public CollectData(OSCollector parent) {
+        public CollectData(OsCollector parent) {
             this.parent = parent;
         }
 
@@ -116,16 +112,13 @@ public class OSCollector {
             String line;
             int resultIdx = 0;
 
-            osData = new BufferedReader(new InputStreamReader(
-                parent.collProc.getInputStream()));
+            osData = new BufferedReader(new InputStreamReader(parent.collProc.getInputStream()));
 
-            while(!endCollection || resultIdx != 0) {
+            while(!parent.endCollection || resultIdx != 0) {
                 try {
                     line = osData.readLine();
                     if(line == null) {
-                        log.error("OSCollector, unexpected EOF " +
-                            "while reading from external " +
-                            "helper process");
+                        logger.error("OsCollector, unexpected EOF while reading from external helper process");
                         break;
                     }
                     parent.resultCSVs[resultIdx].write(line);
@@ -135,7 +128,7 @@ public class OSCollector {
                         resultIdx = 0;
                     }
                 } catch(Exception e) {
-                    log.error("OSCollector, " + e.getMessage());
+                    logger.error("OsCollector, " + e.getMessage());
                     break;
                 }
             }
@@ -146,7 +139,7 @@ public class OSCollector {
                     parent.resultCSVs[i].close();
                 }
             } catch(Exception e) {
-                log.error("OSCollector, " + e.getMessage());
+                logger.error("OsCollector, " + e.getMessage());
             }
         }
     }

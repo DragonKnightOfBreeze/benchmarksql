@@ -1,24 +1,28 @@
 /*
- * jTPCCTerminal - Terminal emulator code for jTPCC (transactions)
- *
  * Copyright (C) 2003, Raul Barbosa
  * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import org.apache.log4j.*;
 
 import java.io.*;
 import java.sql.*;
 
-
-public class jTPCCTerminal implements jTPCCConfig, Runnable {
-    private static final org.apache.log4j.Logger log = Logger.getLogger(jTPCCTerminal.class);
-    long terminalStartTime = 0;
-    long transactionEnd = 0;
-    jTPCCConnection db = null;
-    int dbType = 0;
+/**
+ * Terminal emulator code for Tpcc (transactions).
+ */
+public class TpccTerminal implements TpccConfig, Runnable {
+    private static final Logger logger = Logger.getLogger(TpccTerminal.class);
+    
+    private long terminalStartTime = 0;
+    private long transactionEnd = 0;
+    private TpccConnection db = null;
+    private int dbType = 0;
     private final String terminalName;
     private Connection conn = null;
     private Statement stmt = null;
@@ -32,8 +36,8 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable {
     private final int deliveryWeight;
     private final int stockLevelWeight;
     private final int limPerMin_Terminal;
-    private final jTPCC parent;
-    private final jTPCCRandom rnd;
+    private final Tpcc parent;
+    private final TpccRandom rnd;
     private final int transactionCount = 1;
     private final int numTransactions;
     private final int numWarehouses;
@@ -43,13 +47,11 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable {
     private final int result = 0;
     private boolean stopRunningSignal = false;
 
-    public jTPCCTerminal
-        (String terminalName, int terminalWarehouseID, int terminalDistrictID,
-            Connection conn, int dbType,
-            int numTransactions, boolean terminalWarehouseFixed,
-            int paymentWeight, int orderStatusWeight,
-            int deliveryWeight, int stockLevelWeight, int numWarehouses, int limPerMin_Terminal, jTPCC parent)
-    throws SQLException {
+    public TpccTerminal(
+        String terminalName, int terminalWarehouseID, int terminalDistrictID, Connection conn, int dbType,
+        int numTransactions, boolean terminalWarehouseFixed, int paymentWeight, int orderStatusWeight,
+        int deliveryWeight, int stockLevelWeight, int numWarehouses, int limPerMin_Terminal, Tpcc parent
+    ) throws SQLException {
         this.terminalName = terminalName;
         this.conn = conn;
         this.dbType = dbType;
@@ -74,7 +76,7 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable {
         this.newOrderCounter = 0;
         this.limPerMin_Terminal = limPerMin_Terminal;
 
-        this.db = new jTPCCConnection(conn, dbType);
+        this.db = new TpccConnection(conn, dbType);
 
         terminalMessage("");
         terminalMessage("Terminal '"
@@ -147,99 +149,99 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable {
             }
 
             if(transactionType <= paymentWeight) {
-                jTPCCTData term = new jTPCCTData();
+                TpccData term = new TpccData();
                 term.setNumWarehouses(numWarehouses);
                 term.setWarehouse(terminalWarehouseID);
                 term.setDistrict(terminalDistrictID);
                 try {
-                    term.generatePayment(log, rnd, 0);
-                    term.traceScreen(log);
-                    term.execute(log, db);
+                    term.generatePayment(logger, rnd, 0);
+                    term.traceScreen(logger);
+                    term.execute(logger, db);
                     parent.resultAppend(term);
-                    term.traceScreen(log);
+                    term.traceScreen(logger);
                 } catch(Exception e) {
-                    log.fatal(e.getMessage());
+                    logger.fatal(e.getMessage());
                     e.printStackTrace();
                     System.exit(4);
                 }
                 transactionTypeName = "Payment";
             } else if(transactionType <= paymentWeight + stockLevelWeight) {
-                jTPCCTData term = new jTPCCTData();
+                TpccData term = new TpccData();
                 term.setNumWarehouses(numWarehouses);
                 term.setWarehouse(terminalWarehouseID);
                 term.setDistrict(terminalDistrictID);
                 try {
-                    term.generateStockLevel(log, rnd, 0);
-                    term.traceScreen(log);
-                    term.execute(log, db);
+                    term.generateStockLevel(logger, rnd, 0);
+                    term.traceScreen(logger);
+                    term.execute(logger, db);
                     parent.resultAppend(term);
-                    term.traceScreen(log);
+                    term.traceScreen(logger);
                 } catch(Exception e) {
-                    log.fatal(e.getMessage());
+                    logger.fatal(e.getMessage());
                     e.printStackTrace();
                     System.exit(4);
                 }
                 transactionTypeName = "Stock-Level";
             } else if(transactionType <= paymentWeight + stockLevelWeight + orderStatusWeight) {
-                jTPCCTData term = new jTPCCTData();
+                TpccData term = new TpccData();
                 term.setNumWarehouses(numWarehouses);
                 term.setWarehouse(terminalWarehouseID);
                 term.setDistrict(terminalDistrictID);
                 try {
-                    term.generateOrderStatus(log, rnd, 0);
-                    term.traceScreen(log);
-                    term.execute(log, db);
+                    term.generateOrderStatus(logger, rnd, 0);
+                    term.traceScreen(logger);
+                    term.execute(logger, db);
                     parent.resultAppend(term);
-                    term.traceScreen(log);
+                    term.traceScreen(logger);
                 } catch(Exception e) {
-                    log.fatal(e.getMessage());
+                    logger.fatal(e.getMessage());
                     e.printStackTrace();
                     System.exit(4);
                 }
                 transactionTypeName = "Order-Status";
             } else if(transactionType <= paymentWeight + stockLevelWeight + orderStatusWeight + deliveryWeight) {
-                jTPCCTData term = new jTPCCTData();
+                TpccData term = new TpccData();
                 term.setNumWarehouses(numWarehouses);
                 term.setWarehouse(terminalWarehouseID);
                 term.setDistrict(terminalDistrictID);
                 try {
-                    term.generateDelivery(log, rnd, 0);
-                    term.traceScreen(log);
-                    term.execute(log, db);
+                    term.generateDelivery(logger, rnd, 0);
+                    term.traceScreen(logger);
+                    term.execute(logger, db);
                     parent.resultAppend(term);
-                    term.traceScreen(log);
+                    term.traceScreen(logger);
 
                     /*
                      * The old style driver does not have a delivery
                      * background queue, so we have to execute that
                      * part here as well.
                      */
-                    jTPCCTData bg = term.getDeliveryBG();
-                    bg.traceScreen(log);
-                    bg.execute(log, db);
+                    TpccData bg = term.getDeliveryBG();
+                    bg.traceScreen(logger);
+                    bg.execute(logger, db);
                     parent.resultAppend(bg);
-                    bg.traceScreen(log);
+                    bg.traceScreen(logger);
 
                     skippedDeliveries = bg.getSkippedDeliveries();
                 } catch(Exception e) {
-                    log.fatal(e.getMessage());
+                    logger.fatal(e.getMessage());
                     e.printStackTrace();
                     System.exit(4);
                 }
                 transactionTypeName = "Delivery";
             } else {
-                jTPCCTData term = new jTPCCTData();
+                TpccData term = new TpccData();
                 term.setNumWarehouses(numWarehouses);
                 term.setWarehouse(terminalWarehouseID);
                 term.setDistrict(terminalDistrictID);
                 try {
-                    term.generateNewOrder(log, rnd, 0);
-                    term.traceScreen(log);
-                    term.execute(log, db);
+                    term.generateNewOrder(logger, rnd, 0);
+                    term.traceScreen(logger);
+                    term.execute(logger, db);
                     parent.resultAppend(term);
-                    term.traceScreen(log);
+                    term.traceScreen(logger);
                 } catch(Exception e) {
-                    log.fatal(e.getMessage());
+                    logger.fatal(e.getMessage());
                     e.printStackTrace();
                     System.exit(4);
                 }
@@ -275,47 +277,41 @@ public class jTPCCTerminal implements jTPCCConfig, Runnable {
             }
         }
     }
-
-
+    
     private void error(String type) {
-        log.error(terminalName + ", TERMINAL=" + terminalName + "  TYPE=" + type + "  COUNT=" + transactionCount);
+        logger.error(terminalName + ", TERMINAL=" + terminalName + "  TYPE=" + type + "  COUNT=" + transactionCount);
         System.out.println(terminalName + ", TERMINAL=" + terminalName + "  TYPE=" + type + "  COUNT=" + transactionCount);
     }
-
-
+    
     private void logException(Exception e) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
         e.printStackTrace(printWriter);
         printWriter.close();
-        log.error(stringWriter.toString());
+        logger.error(stringWriter.toString());
     }
-
-
+    
     private void terminalMessage(String message) {
-        log.trace(terminalName + ", " + message);
+        logger.trace(terminalName + ", " + message);
     }
-
-
+    
     private void printMessage(String message) {
-        log.trace(terminalName + ", " + message);
+        logger.trace(terminalName + ", " + message);
     }
 
-
-    void transRollback() {
+    private void transRollback() {
         try {
             conn.rollback();
         } catch(SQLException se) {
-            log.error(se.getMessage());
+            logger.error(se.getMessage());
         }
     }
 
-
-    void transCommit() {
+    private void transCommit() {
         try {
             conn.commit();
         } catch(SQLException se) {
-            log.error(se.getMessage());
+            logger.error(se.getMessage());
             transRollback();
         }
     }

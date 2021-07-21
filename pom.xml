@@ -9,7 +9,7 @@
   <packaging>jar</packaging>
 
   <name>benchmarksql</name>
-  <description>BenchmarkSql for TPCC test refactored by DragonKnightOfBreeze.</description>
+  <description>BenchmarkSql for TPC-C benchmark refactored by DragonKnightOfBreeze.</description>
 
   <properties>
     <java.version>1.8</java.version>
@@ -72,28 +72,6 @@
         <version>3.6.0</version>
         <configuration>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.2.0</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/src/client</source>
-                <source>${basedir}/src/jdbc</source>
-                <source>${basedir}/src/LoadData</source>
-                <source>${basedir}/src/OSCollector</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

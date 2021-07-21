@@ -1,20 +1,23 @@
 /*
- * LoadDataWorker - Class to load one Warehouse (or in a special case
- * the ITEM table).
- *
  * Copyright (C) 2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import java.io.*;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Class to load one Warehouse (or in a special case the ITEM table).
+ */
 public class LoadDataWorker implements Runnable {
     private final int worker;
     private Connection dbConn;
-    private final jTPCCRandom rnd;
+    private final TpccRandom rnd;
 
     private final StringBuffer sb;
     private final Formatter fmt;
@@ -54,7 +57,7 @@ public class LoadDataWorker implements Runnable {
     private StringBuffer sbNewOrder = null;
     private Formatter fmtNewOrder = null;
 
-    LoadDataWorker(int worker, String csvNull, jTPCCRandom rnd) {
+    LoadDataWorker(int worker, String csvNull, TpccRandom rnd) {
         this.worker = worker;
         this.csvNull = csvNull;
         this.rnd = rnd;
@@ -85,8 +88,7 @@ public class LoadDataWorker implements Runnable {
         this.fmtNewOrder = new Formatter(sbNewOrder);
     }
 
-    LoadDataWorker(int worker, Connection dbConn, jTPCCRandom rnd)
-    throws SQLException {
+    LoadDataWorker(int worker, Connection dbConn, TpccRandom rnd) throws SQLException {
         this.worker = worker;
         this.dbConn = dbConn;
         this.rnd = rnd;
@@ -160,9 +162,6 @@ public class LoadDataWorker implements Runnable {
         );
     }
 
-    /*
-     * run()
-     */
     public void run() {
         int job;
 
@@ -212,16 +211,12 @@ public class LoadDataWorker implements Runnable {
             sb.setLength(0);
             e.printStackTrace();
         }
-    } // End run()
+    }
 
-    /* ----
-     * loadItem()
-     *
+    /**
      * Load the content of the ITEM table.
-     * ----
      */
-    private void loadItem()
-    throws SQLException, IOException {
+    private void loadItem() throws SQLException, IOException {
         int i_id;
 
         if(writeCSV) {
@@ -308,16 +303,12 @@ public class LoadDataWorker implements Runnable {
             dbConn.commit();
         }
 
-    } // End loadItem()
-
-    /* ----
-     * loadWarehouse()
-     *
+    }
+    
+    /**
      * Load the content of one warehouse.
-     * ----
      */
-    private void loadWarehouse(int w_id)
-    throws SQLException, IOException {
+    private void loadWarehouse(int w_id) throws SQLException, IOException {
         /*
          * Load the WAREHOUSE row.
          */
@@ -691,5 +682,5 @@ public class LoadDataWorker implements Runnable {
         if(!writeCSV) {
             dbConn.commit();
         }
-    } // End loadWarehouse()
+    }
 }

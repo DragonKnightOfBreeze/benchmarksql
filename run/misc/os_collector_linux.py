@@ -141,7 +141,7 @@ def main(argv):
         return 0
 
     # ----
-    # The OSCollector class will just close our stdout on the other
+    # The OsCollector class will just close our stdout on the other
     # side, so this is expected.
     # ----
     except IOError as e:

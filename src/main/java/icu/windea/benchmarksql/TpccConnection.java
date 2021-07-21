@@ -1,18 +1,19 @@
 /*
- * jTPCCConnection
- *
- * One connection to the database. Used by either the old style
- * Terminal or the new TimedSUT.
- *
  * Copyright (C) 2004-2016, Denis Lussier
  * Copyright (C) 2016, Jan Wieck
  *
+ * Copyright (C) 2021, DragonKnightOfBreeze
  */
+
+package icu.windea.benchmarksql;
 
 import java.sql.*;
 import java.util.*;
 
-public class jTPCCConnection {
+/**
+ * One connection to the database. Used by either the old style Terminal or the new TimedSUT.
+ */
+public class TpccConnection {
     public PreparedStatement stmtNewOrderSelectWhseCust;
     public PreparedStatement stmtNewOrderSelectDist;
     public PreparedStatement stmtNewOrderUpdateDist;
@@ -44,10 +45,10 @@ public class jTPCCConnection {
     public PreparedStatement stmtDeliveryBGSelectSumOLAmount;
     public PreparedStatement stmtDeliveryBGUpdateOrderLine;
     public PreparedStatement stmtDeliveryBGUpdateCustomer;
-    private Connection dbConn = null;
-    private int dbType = 0;
+    private Connection dbConn;
+    private int dbType;
 
-    public jTPCCConnection(Connection dbConn, int dbType) throws SQLException {
+    public TpccConnection(Connection dbConn, int dbType) throws SQLException {
         this.dbConn = dbConn;
         this.dbType = dbType;
 
@@ -182,7 +183,7 @@ public class jTPCCConnection {
 
         // PreparedStatements for STOCK_LEVEL
         switch(dbType) {
-        case jTPCCConfig.DB_POSTGRES:
+        case TpccConfig.DB_POSTGRES:
             stmtStockLevelSelectLow = dbConn.prepareStatement(
                 "select count(*) as low_stock from (" +
                     "    select s_w_id, s_i_id, s_quantity " +
@@ -249,7 +250,7 @@ public class jTPCCConnection {
                 "    where c_w_id = ? and c_d_id = ? and c_id = ?");
     }
 
-    public jTPCCConnection(String connURL, Properties connProps, int dbType) throws SQLException {
+    public TpccConnection(String connURL, Properties connProps, int dbType) throws SQLException {
         this(DriverManager.getConnection(connURL, connProps), dbType);
     }
 
