@@ -18,4 +18,4 @@ setCP || exit 1
 
 myOPTS="-Dprop=$1 -DrunID=${SEQ}"
 
-java -cp "$myCP" $myOPTS jTPCC
+java -cp "$myCP" $myOPTS icu.windea.benchmarksql.Tpcc

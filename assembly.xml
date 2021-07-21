@@ -13,6 +13,7 @@
       <excludes>
         <exclude>.idea/</exclude>
         <exclude>build/</exclude>
+        <exclude>target/</exclude>
       </excludes>
       <fileMode>0755</fileMode>
     </fileSet>

@@ -26,6 +26,7 @@ public final class TpccUtil implements TpccConfig {
             outPropertyValue = System.getProperty(inSysProperty, defaultValue);
         } catch(Exception e) {
             System.err.println("Error Reading Required System Property '" + inSysProperty + "'");
+            e.printStackTrace();
         }
 
         return (outPropertyValue);

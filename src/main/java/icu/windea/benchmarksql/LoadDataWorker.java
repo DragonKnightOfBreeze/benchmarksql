@@ -144,13 +144,14 @@ public final class LoadDataWorker implements Runnable {
             if(!writeCSV) {
                 dbConn.close();
             }
-        } catch(SQLException se) {
-            while(se != null) {
-                fmt.format("Worker %03d: ERROR: %s", worker, se.getMessage());
+        } catch(SQLException e) {
+            while(e != null) {
+                fmt.format("Worker %03d: ERROR: %s", worker, e.getMessage());
                 System.err.println(sb.toString());
                 sb.setLength(0);
-                se = se.getNextException();
+                e = e.getNextException();
             }
+            e.printStackTrace();
         } catch(Exception e) {
             fmt.format("Worker %03d: ERROR: %s", worker, e.getMessage());
             System.err.println(sb.toString());

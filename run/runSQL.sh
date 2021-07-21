@@ -40,9 +40,7 @@ else
     fi
 fi
 
-# ----
 # Set myCP according to the database type.
-# ----
 setCP || exit 1
 
 echo "# ------------------------------------------------------------"
@@ -50,4 +48,4 @@ echo "# Loading SQL file ${SQL_FILE}"
 echo "# ------------------------------------------------------------"
 myOPTS="-Dprop=$1"
 myOPTS="$myOPTS -DcommandFile=${SQL_FILE}"
-java -cp "$myCP" $myOPTS ExecJDBC
+java -cp "$myCP" $myOPTS icu.windea.benchmarksql.ExecJdbc

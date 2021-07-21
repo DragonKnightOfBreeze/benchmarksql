@@ -8,6 +8,9 @@ fi
 source funcs.sh $1
 shift
 
+# Set myCP according to the database type.
 setCP || exit 1
 
-java -cp "$myCP" -Dprop=$PROPS LoadData $*
+myOPTS="-Dprop=$PROPS"
+myOPTS="$myOPTS -DloadDataFile=./sql.internal/loadData.sql -DtpccFile=./sql.internal/tpcc.sql"
+java -cp "$myCP" $myOPTS icu.windea.benchmarksql.LoadData $*

@@ -77,8 +77,8 @@ public final class LoadData {
         try {
             Class.forName(iniGetString("driver"));
         } catch(Exception e) {
-            System.err.println("ERROR: cannot load JDBC driver - " +
-                e.getMessage());
+            System.err.println("ERROR: cannot load JDBC driver - " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
         db = iniGetString("conn");
@@ -128,8 +128,9 @@ public final class LoadData {
                     "order-line.csv"));
                 newOrderCSV = new BufferedWriter(new FileWriter(fileLocation +
                     "new-order.csv"));
-            } catch(IOException ie) {
-                System.err.println(ie.getMessage());
+            } catch(IOException e) {
+                System.err.println(e.getMessage());
+                e.printStackTrace();
                 System.exit(3);
             }
         }
@@ -156,8 +157,9 @@ public final class LoadData {
                 }
                 workerThreads[i] = new Thread(workers[i]);
                 workerThreads[i].start();
-            } catch(SQLException se) {
-                System.err.println("ERROR: " + se.getMessage());
+            } catch(SQLException e) {
+                System.err.println("ERROR: " + e.getMessage());
+                e.printStackTrace();
                 System.exit(3);
                 return;
             }
@@ -167,9 +169,9 @@ public final class LoadData {
         for(i = 0; i < numWorkers; i++) {
             try {
                 workerThreads[i].join();
-            } catch(InterruptedException ie) {
-                System.err.println("ERROR: worker " + i + " - " +
-                    ie.getMessage());
+            } catch(InterruptedException e) {
+                System.err.println("ERROR: worker " + i + " - " + e.getMessage());
+                e.printStackTrace();
                 System.exit(4);
             }
         }
