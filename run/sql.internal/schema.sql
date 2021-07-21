@@ -61,7 +61,6 @@ create table bmsql_customer (
   c_data         varchar(500)
 );
 
-
 create table bmsql_history (
   hist_id  integer,
   h_c_id   integer,
