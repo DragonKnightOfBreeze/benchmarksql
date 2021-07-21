@@ -8,6 +8,7 @@
 
 package icu.windea.benchmarksql;
 
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 
@@ -29,7 +30,7 @@ public final class TpccUtil implements TpccConfig {
 
         return (outPropertyValue);
     }
-    
+
     public static String randomStr(long strLen) {
         char freshChar;
         StringBuilder freshString = new StringBuilder();
@@ -41,7 +42,7 @@ public final class TpccUtil implements TpccConfig {
         }
         return freshString.toString();
     }
-    
+
     public static String getCurrentTime() {
         return dateFormat.format(new java.util.Date());
     }
@@ -69,5 +70,13 @@ public final class TpccUtil implements TpccConfig {
         rs.close();
 
         return value;
+    }
+
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if(closeable != null) {
+                closeable.close();
+            }
+        } catch(IOException ignored) { }
     }
 }
