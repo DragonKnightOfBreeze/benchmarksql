@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Utility functions for the Open Source Java implementation of the TPC-C benchmark.
  */
-public class TpccUtil implements TpccConfig {
+public final class TpccUtil implements TpccConfig {
     private static Connection dbConn = null;
     private static PreparedStatement stmtGetConfig = null;
 

@@ -1,10 +1,10 @@
-### pre
+-- #pre
 
 create database if not exists benchmarksql;
 
 use benchmarksql;
 
-### tableCreates
+-- #tableCreates
 
 create table bmsql_config (
   cfg_name    varchar(30) primary key,
@@ -132,7 +132,7 @@ create table bmsql_stock (
   s_dist_10    char(24)
 );
 
-### indexCreates
+-- #indexCreates
 
 alter table bmsql_warehouse add constraint bmsql_warehouse_pkey
   primary key (w_id);
@@ -164,7 +164,7 @@ alter table bmsql_stock add constraint bmsql_stock_pkey
 alter table bmsql_item add constraint bmsql_item_pkey
   primary key (i_id);
 
-### foreignKeys
+-- #foreignKeys
 
 alter table bmsql_district add constraint d_warehouse_fkey
   foreign key (d_w_id)

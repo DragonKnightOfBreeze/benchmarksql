@@ -1,4 +1,3 @@
-
 alter table bmsql_warehouse drop constraint bmsql_warehouse_pkey;
 
 alter table bmsql_district drop constraint bmsql_district_pkey;

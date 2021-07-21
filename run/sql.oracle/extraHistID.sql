@@ -10,6 +10,7 @@
 --	column type. The definition below is compatible
 --	with Oracle 11g, using the sequence in a trigger.
 -- ----
+
 -- Adjust the sequence above the current max(hist_id)
 alter sequence bmsql_hist_id_seq increment by 30000;
 declare

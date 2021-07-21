@@ -1,4 +1,3 @@
-
 copy bmsql_config
   (cfg_name, cfg_value)
   from '/tmp/csv/config.csv' WITH CSV;

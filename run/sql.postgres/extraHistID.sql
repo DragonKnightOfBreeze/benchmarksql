@@ -10,6 +10,7 @@
 --      column type. The definition below is compatible
 --      with Oracle 11g, using a sequence and a trigger.
 -- ----
+
 -- Adjust the sequence above the current max(hist_id)
 select setval('bmsql_hist_id_seq', (select max(hist_id) from bmsql_history));
 

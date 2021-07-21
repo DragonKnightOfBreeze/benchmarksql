@@ -1,4 +1,3 @@
-
 alter table bmsql_warehouse add constraint bmsql_warehouse_pkey
   primary key (w_id);
 

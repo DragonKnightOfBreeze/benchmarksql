@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Class to load one Warehouse (or in a special case the ITEM table).
  */
-public class LoadDataWorker implements Runnable {
+public final class LoadDataWorker implements Runnable {
     private final int worker;
     private Connection dbConn;
     private final TpccRandom rnd;
@@ -458,9 +458,7 @@ public class LoadDataWorker implements Runnable {
              */
             for(int c_id = 1; c_id <= 3000; c_id++) {
                 if(writeCSV) {
-                    fmtCustomer.format("%d,%d,%d,%.4f,%s,%s,%s," +
-                            "%.2f,%.2f,%.2f,%d,%d," +
-                            "%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                    fmtCustomer.format("%d,%d,%d,%.4f,%s,%s,%s,%.2f,%.2f,%.2f,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
                         c_id,
                         d_id,
                         w_id,

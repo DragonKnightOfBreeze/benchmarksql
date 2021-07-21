@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Command line program to process SQL DDL statements, from a text input file, to any JDBC Data Source.
  */
-public class ExecJdbc {
+public final class ExecJdbc {
     public static void main(String[] args) {
         Connection conn = null;
         Statement stmt;

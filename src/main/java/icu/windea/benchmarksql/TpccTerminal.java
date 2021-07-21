@@ -16,7 +16,7 @@ import java.sql.*;
 /**
  * Terminal emulator code for Tpcc (transactions).
  */
-public class TpccTerminal implements TpccConfig, Runnable {
+public final class TpccTerminal implements TpccConfig, Runnable {
     private static final Logger logger = Logger.getLogger(TpccTerminal.class);
     
     private long terminalStartTime = 0;

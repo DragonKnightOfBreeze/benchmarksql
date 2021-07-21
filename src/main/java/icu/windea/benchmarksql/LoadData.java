@@ -15,7 +15,7 @@ import java.util.concurrent.*;
 /**
  * Load Sample Data directly into database tables or into CSV files using multiple parallel workers.
  */
-public class LoadData {
+public final class LoadData {
     private static final Properties ini = new Properties();
     private static String db;
     private static Properties dbProps;
@@ -332,8 +332,7 @@ public class LoadData {
         }
 
         if(strVal == null) {
-            System.out.println(name + " (not defined - using default '" +
-                defVal + "')");
+            System.out.println(name + " (not defined - using default '" + defVal + "')");
             return defVal;
         } else if(name.equals("password")) {
             System.out.println(name + "=***********");

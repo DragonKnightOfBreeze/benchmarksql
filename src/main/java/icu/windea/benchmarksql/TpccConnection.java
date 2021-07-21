@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * One connection to the database. Used by either the old style Terminal or the new TimedSUT.
  */
-public class TpccConnection {
+public final class TpccConnection {
     public PreparedStatement stmtNewOrderSelectWhseCust;
     public PreparedStatement stmtNewOrderSelectDist;
     public PreparedStatement stmtNewOrderUpdateDist;

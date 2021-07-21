@@ -1,4 +1,3 @@
-
 truncate table bmsql_warehouse;
 
 truncate table bmsql_item;

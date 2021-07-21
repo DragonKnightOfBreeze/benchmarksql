@@ -12,7 +12,7 @@ import org.apache.log4j.*;
 import java.io.*;
 import java.util.*;
 
-public class OsCollector {
+public final class OsCollector {
     private static final Logger logger = Logger.getLogger(OsCollector.class);
     
     private final String script;

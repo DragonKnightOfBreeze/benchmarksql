@@ -1,4 +1,3 @@
-
 alter table bmsql_district add constraint d_warehouse_fkey
     foreign key (d_w_id)
     references bmsql_warehouse (w_id);

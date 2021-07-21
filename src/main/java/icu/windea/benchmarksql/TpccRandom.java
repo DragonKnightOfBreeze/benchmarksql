@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Utility functions for the Open Source Java implementation of the TPC-C benchmark.
  */
-public class TpccRandom {
+public final class TpccRandom {
     private static final char[] aStringChars = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',

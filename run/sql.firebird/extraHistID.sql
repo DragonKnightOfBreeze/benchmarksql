@@ -11,6 +11,7 @@
 --	with Firebird, using the sequence in a trigger.
 -- ----
 -- Adjust the sequence above the current max(hist_id)
+
 execute block 
 as
     declare max_hist_id integer\;

@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * The simulated terminal input/output data.
  */
-public class TpccData {
+public final class TpccData {
     public final static int TT_NEW_ORDER = 0;
     public final static int TT_PAYMENT = 1;
     public final static int TT_ORDER_STATUS = 2;

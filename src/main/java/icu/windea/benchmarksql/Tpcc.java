@@ -20,7 +20,7 @@ import java.util.regex.*;
 /**
  * Open Source Java implementation of a TPC-C like benchmark.
  */
-public class Tpcc implements TpccConfig {
+public final class Tpcc implements TpccConfig {
     private static final Logger logger = Logger.getLogger(Tpcc.class);
     
     private static String resultDirName = null;
