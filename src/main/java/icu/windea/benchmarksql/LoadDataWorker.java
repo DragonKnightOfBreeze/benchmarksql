@@ -96,16 +96,16 @@ public final class LoadDataWorker implements Runnable {
         this.sb = new StringBuffer();
         this.fmt = new Formatter(sb);
 
-        stmtConfig = dbConn.prepareStatement(TpccSql.loadConfigSql());
-        stmtItem = dbConn.prepareStatement(TpccSql.loadItemSql());
-        stmtWarehouse = dbConn.prepareStatement(TpccSql.loadWarehouseSql());
-        stmtStock = dbConn.prepareStatement(TpccSql.loadStockSql());
-        stmtDistrict = dbConn.prepareStatement(TpccSql.loadDistrictSql());
-        stmtCustomer = dbConn.prepareStatement(TpccSql.loadCustomerSql());
-        stmtHistory = dbConn.prepareStatement(TpccSql.loadHistorySql());
-        stmtOrder = dbConn.prepareStatement(TpccSql.loadOrderSql());
-        stmtOrderLine = dbConn.prepareStatement(TpccSql.loadOrderLineSql());
-        stmtNewOrder = dbConn.prepareStatement(TpccSql.loadNewOrderSql());
+        stmtConfig = dbConn.prepareStatement(TpccSql.loadConfig);
+        stmtItem = dbConn.prepareStatement(TpccSql.loadItem);
+        stmtWarehouse = dbConn.prepareStatement(TpccSql.loadWarehouse);
+        stmtStock = dbConn.prepareStatement(TpccSql.loadStock);
+        stmtDistrict = dbConn.prepareStatement(TpccSql.loadDistrict);
+        stmtCustomer = dbConn.prepareStatement(TpccSql.loadCustomer);
+        stmtHistory = dbConn.prepareStatement(TpccSql.loadHistory);
+        stmtOrder = dbConn.prepareStatement(TpccSql.loadOrder);
+        stmtOrderLine = dbConn.prepareStatement(TpccSql.loadOrderLine);
+        stmtNewOrder = dbConn.prepareStatement(TpccSql.loadNewOrder);
     }
 
     public void run() {

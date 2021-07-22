@@ -187,7 +187,7 @@ public final class Tpcc implements TpccConfig {
                     resultDataDir.getPath() + "'");
                 System.exit(1);
             }
-
+    
             // Copy the used properties file into the resultDirectory.
             try {
                 Files.copy(new File(System.getProperty("prop")).toPath(),

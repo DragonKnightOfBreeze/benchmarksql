@@ -73,7 +73,7 @@ public final class TpccData {
         terminalDistrict = district;
     }
 
-    public void execute(Logger log, TpccConnection db)
+    public void execute(Logger logger, TpccConnection db)
     throws Exception {
         transStart = System.currentTimeMillis();
         if(transDue == 0) {
@@ -82,22 +82,22 @@ public final class TpccData {
 
         switch(transType) {
         case TT_NEW_ORDER:
-            executeNewOrder(log, db);
+            executeNewOrder(logger, db);
             break;
         case TT_PAYMENT:
-            executePayment(log, db);
+            executePayment(logger, db);
             break;
         case TT_ORDER_STATUS:
-            executeOrderStatus(log, db);
+            executeOrderStatus(logger, db);
             break;
         case TT_STOCK_LEVEL:
-            executeStockLevel(log, db);
+            executeStockLevel(logger, db);
             break;
         case TT_DELIVERY:
-            executeDelivery(log, db);
+            executeDelivery(db);
             break;
         case TT_DELIVERY_BG:
-            executeDeliveryBG(log, db);
+            executeDeliveryBG(logger, db);
             break;
         default:
             throw new Exception("Unknown transType " + transType);
@@ -106,7 +106,7 @@ public final class TpccData {
         transEnd = System.currentTimeMillis();
     }
 
-    public void traceScreen(Logger log) throws Exception {
+    public void traceScreen(Logger logger) throws Exception {
         StringBuffer sb = new StringBuffer();
         Formatter fmt = new Formatter(sb);
 
@@ -117,7 +117,7 @@ public final class TpccData {
             screenFmt[i] = new Formatter(screenSb[i]);
         }
 
-        if(!log.isTraceEnabled()) {
+        if(!logger.isTraceEnabled()) {
             return;
         }
 
@@ -129,47 +129,47 @@ public final class TpccData {
             fmt.format("==== %s %s ==== Terminal %d,%d =================================================",
                 transTypeNames[transType], (transEnd == 0) ? "INPUT" : "OUTPUT", terminalWarehouse, terminalDistrict);
             sb.setLength(79);
-            log.trace(sb.toString());
+            logger.trace(sb.toString());
             sb.setLength(0);
 
             fmt.format("---- Due:   %s", (transDue == 0) ? "N/A" : new java.sql.Timestamp(transDue).toString());
-            log.trace(sb.toString());
+            logger.trace(sb.toString());
             sb.setLength(0);
 
             fmt.format("---- Start: %s", (transStart == 0) ? "N/A" : new java.sql.Timestamp(transStart).toString());
-            log.trace(sb.toString());
+            logger.trace(sb.toString());
             sb.setLength(0);
 
             fmt.format("---- End:   %s", (transEnd == 0) ? "N/A" : new java.sql.Timestamp(transEnd).toString());
-            log.trace(sb.toString());
+            logger.trace(sb.toString());
             sb.setLength(0);
 
             if(transError != null) {
                 fmt.format("#### ERROR: %s", transError);
-                log.trace(sb.toString());
+                logger.trace(sb.toString());
                 sb.setLength(0);
             }
 
-            log.trace("-------------------------------------------------------------------------------");
+            logger.trace("-------------------------------------------------------------------------------");
 
             switch(transType) {
             case TT_NEW_ORDER:
-                traceNewOrder(log, screenFmt);
+                traceNewOrder(logger, screenFmt);
                 break;
             case TT_PAYMENT:
-                tracePayment(log, screenFmt);
+                tracePayment(logger, screenFmt);
                 break;
             case TT_ORDER_STATUS:
-                traceOrderStatus(log, screenFmt);
+                traceOrderStatus(logger, screenFmt);
                 break;
             case TT_STOCK_LEVEL:
-                traceStockLevel(log, screenFmt);
+                traceStockLevel(logger, screenFmt);
                 break;
             case TT_DELIVERY:
-                traceDelivery(log, screenFmt);
+                traceDelivery(logger, screenFmt);
                 break;
             case TT_DELIVERY_BG:
-                traceDeliveryBG(log, screenFmt);
+                traceDeliveryBG(logger, screenFmt);
                 break;
             default:
                 throw new Exception("Unknown transType " + transType);
@@ -179,11 +179,11 @@ public final class TpccData {
                 if(screenSb[i].length() > 79) {
                     screenSb[i].setLength(79);
                 }
-                log.trace(screenSb[i].toString());
+                logger.trace(screenSb[i].toString());
             }
 
-            log.trace("-------------------------------------------------------------------------------");
-            log.trace("");
+            logger.trace("-------------------------------------------------------------------------------");
+            logger.trace("");
         }
     }
 
@@ -209,7 +209,7 @@ public final class TpccData {
      * **********************************************************************
      * *********************************************************************/
     
-    public void generateNewOrder(Logger log, TpccRandom rnd, long due) {
+    public void generateNewOrder(Logger logger, TpccRandom rnd, long due) {
         int o_ol_cnt;
         int i = 0;
 
@@ -259,7 +259,7 @@ public final class TpccData {
         }
     }
 
-    private void executeNewOrder(Logger log, TpccConnection db) throws Exception {
+    private void executeNewOrder(Logger logger, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         PreparedStatement insertOrderLineBatch;
         PreparedStatement updateStockBatch;
@@ -529,9 +529,9 @@ public final class TpccData {
             db.commit();
 
         } catch(SQLException se) {
-            log.error("Unexpected SQLException in NEW_ORDER");
+            logger.error("Unexpected SQLException in NEW_ORDER");
             for(SQLException x = se; x != null; x = x.getNextException()) {
-                log.error(x.getMessage());
+                logger.error(x.getMessage());
             }
             se.printStackTrace();
 
@@ -555,12 +555,12 @@ public final class TpccData {
             throw e;
         }
 	/*
-	log.info("Reached the point of creating one NEW_ORDER W_ID "+newOrder.w_id+" D_ID "+newOrder.d_id+" C_ID "+newOrder.c_id);
+	logger.info("Reached the point of creating one NEW_ORDER W_ID "+newOrder.w_id+" D_ID "+newOrder.d_id+" C_ID "+newOrder.c_id);
 	System.exit(0);
 	*/
     }
 
-    private void traceNewOrder(Logger log, Formatter[] fmt) {
+    private void traceNewOrder(Logger logger, Formatter[] fmt) {
         fmt[0].format("                                    New Order");
 
         if(transEnd == 0) {
@@ -621,7 +621,7 @@ public final class TpccData {
      * **********************************************************************
      * *********************************************************************/
     
-    public void generatePayment(Logger log, TpccRandom rnd, long due) {
+    public void generatePayment(Logger logger, TpccRandom rnd, long due) {
         transType = TT_PAYMENT;
         transDue = due;
         transStart = 0;
@@ -658,7 +658,7 @@ public final class TpccData {
         payment.h_amount = ((double) rnd.nextLong(100, 500000)) / 100.0;
     }
 
-    private void executePayment(Logger log, TpccConnection db) throws Exception {
+    private void executePayment(Logger logger, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         ResultSet rs;
         Vector<Integer> c_id_list = new Vector<>();
@@ -834,9 +834,9 @@ public final class TpccData {
 
             db.commit();
         } catch(SQLException se) {
-            log.error("Unexpected SQLException in PAYMENT");
+            logger.error("Unexpected SQLException in PAYMENT");
             for(SQLException x = se; x != null; x = x.getNextException()) {
-                log.error(x.getMessage());
+                logger.error(x.getMessage());
             }
             se.printStackTrace();
 
@@ -857,7 +857,7 @@ public final class TpccData {
         }
     }
 
-    private void tracePayment(Logger log, Formatter[] fmt) {
+    private void tracePayment(Logger logger, Formatter[] fmt) {
         fmt[0].format("                                     Payment");
 
         if(transEnd == 0) {
@@ -898,7 +898,7 @@ public final class TpccData {
                 payment.w_zip.substring(0, 5), payment.w_zip.substring(5, 9),
                 payment.d_city, payment.d_state,
                 payment.d_zip.substring(0, 5), payment.d_zip.substring(5, 9));
-            log.trace("w_zip=" + payment.w_zip + " d_zip=" + payment.d_zip);
+            logger.trace("w_zip=" + payment.w_zip + " d_zip=" + payment.d_zip);
 
             fmt[8].format("Customer: %4d  Cust-Warehouse: %6d  Cust-District: %2d",
                 payment.c_id, payment.c_w_id, payment.c_d_id);
@@ -935,7 +935,7 @@ public final class TpccData {
      * **********************************************************************
      * *********************************************************************/
     
-    public void generateOrderStatus(Logger log, TpccRandom rnd, long due) {
+    public void generateOrderStatus(Logger logger, TpccRandom rnd, long due) {
         transType = TT_ORDER_STATUS;
         transDue = due;
         transStart = 0;
@@ -961,7 +961,7 @@ public final class TpccData {
         }
     }
 
-    private void executeOrderStatus(Logger log, TpccConnection db) throws Exception {
+    private void executeOrderStatus(Logger logger, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         ResultSet rs;
         Vector<Integer> c_id_list = new Vector<>();
@@ -1066,9 +1066,9 @@ public final class TpccData {
 
             db.rollback();
         } catch(SQLException se) {
-            log.error("Unexpected SQLException in ORDER_STATUS");
+            logger.error("Unexpected SQLException in ORDER_STATUS");
             for(SQLException x = se; x != null; x = x.getNextException()) {
-                log.error(x.getMessage());
+                logger.error(x.getMessage());
             }
             se.printStackTrace();
 
@@ -1089,7 +1089,7 @@ public final class TpccData {
         }
     }
 
-    private void traceOrderStatus(Logger log, Formatter[] fmt) {
+    private void traceOrderStatus(Logger logger, Formatter[] fmt) {
         fmt[0].format("                                  Order Status");
 
         if(transEnd == 0) {
@@ -1142,7 +1142,7 @@ public final class TpccData {
      * **********************************************************************
      * *********************************************************************/
     
-    public void generateStockLevel(Logger log, TpccRandom rnd, long due) {
+    public void generateStockLevel(Logger logger, TpccRandom rnd, long due) {
         transType = TT_STOCK_LEVEL;
         transDue = due;
         transStart = 0;
@@ -1162,7 +1162,7 @@ public final class TpccData {
         stockLevel.threshold = rnd.nextInt(10, 20);
     }
 
-    private void executeStockLevel(Logger log, TpccConnection db) throws Exception {
+    private void executeStockLevel(Logger logger, TpccConnection db) throws Exception {
         PreparedStatement stmt;
         ResultSet rs;
 
@@ -1183,9 +1183,9 @@ public final class TpccData {
 
             db.rollback();
         } catch(SQLException se) {
-            log.error("Unexpected SQLException in STOCK_LEVEL");
+            logger.error("Unexpected SQLException in STOCK_LEVEL");
             for(SQLException x = se; x != null; x = x.getNextException()) {
-                log.error(x.getMessage());
+                logger.error(x.getMessage());
             }
             se.printStackTrace();
 
@@ -1206,7 +1206,7 @@ public final class TpccData {
         }
     }
 
-    private void traceStockLevel(Logger log, Formatter[] fmt) {
+    private void traceStockLevel(Logger logger, Formatter[] fmt) {
         fmt[0].format("                                  Stock-Level");
 
         fmt[1].format("Warehouse: %6d   District: %2d",
@@ -1228,7 +1228,7 @@ public final class TpccData {
      * **********************************************************************
      * *********************************************************************/
     
-    public void generateDelivery(Logger log, TpccRandom rnd, long due) {
+    public void generateDelivery(Logger logger, TpccRandom rnd, long due) {
         transType = TT_DELIVERY;
         transDue = due;
         transStart = 0;
@@ -1249,7 +1249,7 @@ public final class TpccData {
         delivery.deliveryBG = null;
     }
 
-    private void executeDelivery(Logger log, TpccConnection db) {
+    private void executeDelivery(TpccConnection db) {
         long now = System.currentTimeMillis();
 
         /*
@@ -1266,7 +1266,7 @@ public final class TpccData {
         delivery.execution_status = "Delivery has been queued";
     }
 
-    private void traceDelivery(Logger log, Formatter[] fmt) {
+    private void traceDelivery(Logger logger, Formatter[] fmt) {
         fmt[0].format("                                     Delivery");
         fmt[1].format("Warehouse: %6d", delivery.w_id);
         fmt[3].format("Carrier Number: %2d", delivery.o_carrier_id);
@@ -1331,7 +1331,7 @@ public final class TpccData {
         }
     }
 
-    private void executeDeliveryBG(Logger log, TpccConnection db) throws Exception {
+    private void executeDeliveryBG(Logger logger, TpccConnection db) throws Exception {
         PreparedStatement stmt1;
         PreparedStatement stmt2;
         ResultSet rs;
@@ -1458,9 +1458,9 @@ public final class TpccData {
 
             db.commit();
         } catch(SQLException se) {
-            log.error("Unexpected SQLException in DELIVERY_BG");
+            logger.error("Unexpected SQLException in DELIVERY_BG");
             for(SQLException x = se; x != null; x = x.getNextException()) {
-                log.error(x.getMessage());
+                logger.error(x.getMessage());
             }
             se.printStackTrace();
 
@@ -1481,7 +1481,7 @@ public final class TpccData {
         }
     }
 
-    private void traceDeliveryBG(Logger log, Formatter[] fmt) {
+    private void traceDeliveryBG(Logger logger, Formatter[] fmt) {
         fmt[0].format("                                    DeliveryBG");
         fmt[1].format("Warehouse: %6d", deliveryBG.w_id);
         fmt[2].format("Carrier Number: %2d", deliveryBG.o_carrier_id);
